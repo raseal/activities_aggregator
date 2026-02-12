@@ -50,3 +50,7 @@ services:
         Shared\Application\Bus\Query\QueryHandler:
             tags:
                 - { name: messenger.message_handler, bus: query.bus }
+
+    SymfonyClient\CLI\ActivitiesIngestor:
+        arguments:
+            $baseUrl: '%env(EXTERNAL_PROVIDER_BASE_URL)%'
