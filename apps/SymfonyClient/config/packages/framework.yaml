@@ -21,6 +21,11 @@ framework:
         packages:
             swagger_ui:
                 base_path: '/bundles/apiplatform'
+    # HttpClient configuration
+    http_client:
+        default_options:
+            timeout: 30
+            max_redirects: 3
 
 when@test:
     framework:
