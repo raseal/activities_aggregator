@@ -26,6 +26,12 @@ services:
     Shared\:
         resource: '../../../src/Shared/'
 
+    Catalog\:
+        resource: '../../../src/Catalog/'
+
+    Ingestor\:
+        resource: '../../../src/Ingestor/'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 

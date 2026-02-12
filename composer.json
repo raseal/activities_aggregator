@@ -3,14 +3,14 @@
   "autoload": {
     "psr-4": {
       "Shared\\": "src/Shared",
-      "SymfonyClient\\": "apps/SymfonyClient/src"
+      "SymfonyClient\\": "apps/SymfonyClient/src",
+      "Ingestor\\": "src/Ingestor",
+      "Catalog\\": "src/Catalog"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Test\\": "tests",
-      "Ingestor\\": "src/Ingestor",
-      "Catalog\\": "src/Catalog"
+      "Test\\": "tests"
     }
   },
   "extra": {
@@ -35,7 +35,9 @@
     "api-platform/core": "^4.2",
     "symfony/twig-bundle": "8.0.*",
     "symfony/asset": "8.0.*",
-    "symfony/http-client": "8.0.*"
+    "symfony/http-client": "^8.0",
+    "ext-xmlreader": "*",
+    "ext-simplexml": "*"
   },
   "scripts": {
     "auto-scripts": {
