@@ -1,0 +1,20 @@
+api_platform:
+    title: Hello API Platform
+    version: 1.0.0
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+    enable_swagger_ui: true
+    enable_re_doc: true
+    swagger:
+        versions: [3]
+        api_keys:
+            apiKey:
+                name: Authorization
+                type: header
+    graphql:
+        enabled: false
+    mapping:
+        paths:
+            - '%kernel.project_dir%/../../src'

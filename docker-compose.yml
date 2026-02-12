@@ -17,6 +17,6 @@ services:
       - '8000:80'
     volumes:
       - ./etc/infrastructure/nginx/conf.d:/etc/nginx/conf.d
-      - ./apps/SymfonyClient/public/:/app/apps/SymfonyClient/public
+      - ./:/app
     depends_on:
       - php_container

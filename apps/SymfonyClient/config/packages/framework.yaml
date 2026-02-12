@@ -17,6 +17,11 @@ framework:
     php_errors:
         log: true
 
+    assets:
+        packages:
+            swagger_ui:
+                base_path: '/bundles/apiplatform'
+
 when@test:
     framework:
         test: true

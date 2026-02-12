@@ -29,7 +29,10 @@
     "symfony/console": "^8.0",
     "symfony/runtime": "^8.0",
     "symfony/messenger": "^8.0",
-    "ramsey/uuid": "^4.2"
+    "ramsey/uuid": "^4.2",
+    "api-platform/core": "^4.2",
+    "symfony/twig-bundle": "8.0.*",
+    "symfony/asset": "8.0.*"
   },
   "scripts": {
     "auto-scripts": {
