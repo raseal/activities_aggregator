@@ -6,6 +6,7 @@
 /.env.local.php
 /.env.*.local
 /apps/SymfonyClient/config/secrets/prod/prod.decrypt.private.php
+/apps/SymfonyClient/config/reference.php
 /apps/SymfonyClient/public/bundles/
 /apps/SymfonyClient/var/
 ###< symfony/framework-bundle ###
