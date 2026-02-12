@@ -1,0 +1,22 @@
+services:
+  php_container:
+    build:
+      context: etc/infrastructure
+      dockerfile: php.Dockerfile
+    container_name: php_container
+    volumes:
+      - ./:/app
+    working_dir: /app
+    ports:
+      - '9001:9000'
+
+  nginx_container:
+    image: nginx:latest
+    container_name: nginx_container
+    ports:
+      - '8000:80'
+    volumes:
+      - ./etc/infrastructure/nginx/conf.d:/etc/nginx/conf.d
+      - ./apps/SymfonyClient/public/:/app/apps/SymfonyClient/public
+    depends_on:
+      - php_container
