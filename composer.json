@@ -37,7 +37,8 @@
     "symfony/asset": "8.0.*",
     "symfony/http-client": "^8.0",
     "ext-xmlreader": "*",
-    "ext-simplexml": "*"
+    "ext-simplexml": "*",
+    "symfony/redis-messenger": "8.0.*"
   },
   "scripts": {
     "auto-scripts": {

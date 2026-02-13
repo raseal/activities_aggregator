@@ -15,6 +15,10 @@ RUN apk --update upgrade \
         zip \
         pdo_mysql
 
+# Install Redis extension
+RUN pecl install redis \
+    && docker-php-ext-enable redis
+
 RUN pecl install xdebug
 
 RUN docker-php-ext-enable \

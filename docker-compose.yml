@@ -9,6 +9,8 @@ services:
     working_dir: /app
     ports:
       - '9001:9000'
+    networks:
+      - redis-network
 
   nginx_container:
     image: nginx:latest
@@ -20,3 +22,37 @@ services:
       - ./:/app
     depends_on:
       - php_container
+    networks:
+      - redis-network
+
+  redis_container:
+    image: redis:latest
+    container_name: redis_container
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - redis-network
+
+  redis-insight_container:
+    image: redis/redisinsight:latest
+    container_name: redis-insight_container
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    volumes:
+      - redis-insight-data:/data
+    networks:
+      - redis-network
+    depends_on:
+      - redis_container
+
+volumes:
+  redis_data:
+  redis-insight-data:
+
+networks:
+    redis-network:
+      driver: bridge
