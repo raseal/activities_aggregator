@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Shared\Domain\ValueObject;
 
-abstract class IntegerValueObject
+abstract readonly class IntegerValueObject
 {
     public function __construct(
         protected int $value

@@ -7,7 +7,7 @@ namespace Shared\Domain\ValueObject;
 use Ramsey\Uuid\Uuid as RamseyUuid;
 use Shared\Domain\Exception\InvalidUuid;
 
-class Uuid extends StringValueObject
+readonly class Uuid extends StringValueObject
 {
     public function __construct(string $value)
     {
