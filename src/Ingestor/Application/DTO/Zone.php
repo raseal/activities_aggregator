@@ -51,10 +51,10 @@ final readonly class Zone
     private static function ensureFieldsExist(array $data): void
     {
         if (!isset($data['zone_id'])) {
-            throw new \InvalidArgumentException('Technical error: zone_id field is missing');
+            throw new \InvalidArgumentException('Format error: zone_id field is missing');
         }
         if (!isset($data['name'])) {
-            throw new \InvalidArgumentException('Technical error: name field is missing');
+            throw new \InvalidArgumentException('Format error: name field is missing');
         }
     }
 }
