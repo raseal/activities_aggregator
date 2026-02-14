@@ -1,6 +1,23 @@
 framework:
     messenger:
         default_bus: command.bus
+        serializer:
+            # default_serializer: messenger.transport.native_php_serializer => Basic from php (serialize/unserialize)
+            default_serializer: Shared\Infrastructure\Symfony\Bus\Serializer\SymfonyMessageSerializer
+        transports:
+            redis-async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000        # millisecond
+                    multiplier: 2      # Exponential backoff
+                    max_delay: 10000   # 10 secs max
+
+            # TODO: implement this
+            failed: 'doctrine://default?queue_name=failed'
+        routing:
+            # Sends events from the IngestEventCommandHandler to the redis instance, to be processed asynchronously
+            'Ingestor\Application\IngestEventMessage': redis-async
         buses:
             command.bus:
             query.bus:
