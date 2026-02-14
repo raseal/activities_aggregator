@@ -35,7 +35,7 @@ destroy:
 
 ## shell:		Interactive shell inside docker
 shell:
-	@docker compose exec php_container sh
+	@docker compose exec -w /app/apps/SymfonyClient php_container sh
 
 ## install:	Install packages
 composer-install:
