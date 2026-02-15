@@ -1,0 +1,10 @@
+doctrine:
+    dbal:
+        dbname: '%env(resolve:DATABASE_NAME)%'
+        host: '%env(resolve:DATABASE_HOST)%'
+        port: '%env(resolve:DATABASE_PORT)%'
+        user: '%env(resolve:DATABASE_USER)%'
+        password: '%env(resolve:DATABASE_PASSWD)%'
+        driver: '%env(resolve:DATABASE_DRIVER)%'
+        server_version: '9.6'
+        profiling_collect_backtrace: '%kernel.debug%'

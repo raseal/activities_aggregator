@@ -38,7 +38,10 @@
     "symfony/http-client": "^8.0",
     "ext-xmlreader": "*",
     "ext-simplexml": "*",
-    "symfony/redis-messenger": "8.0.*"
+    "symfony/redis-messenger": "8.0.*",
+    "doctrine/doctrine-bundle": "^3.2",
+    "doctrine/orm": "^3.6",
+    "doctrine/doctrine-migrations-bundle": "^4.0"
   },
   "scripts": {
     "auto-scripts": {
