@@ -35,6 +35,13 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    Ingestor\Infrastructure\Http\HttpEventsProviderClient:
+        arguments:
+            $baseUrl: '%env(EXTERNAL_PROVIDER_BASE_URL)%'
+
+    Shared\Application\Bus\Message\MessageBus:
+        '@Shared\Infrastructure\Symfony\Bus\Message\SymfonyMessageBus'
+
     Shared\Infrastructure\Symfony\Bus\Query\SymfonyQueryBus:
         arguments:
             $bus: '@query.bus'
@@ -50,7 +57,3 @@ services:
         Shared\Application\Bus\Query\QueryHandler:
             tags:
                 - { name: messenger.message_handler, bus: query.bus }
-
-    SymfonyClient\CLI\ActivitiesIngestor:
-        arguments:
-            $baseUrl: '%env(EXTERNAL_PROVIDER_BASE_URL)%'
