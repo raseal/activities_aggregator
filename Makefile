@@ -48,9 +48,12 @@ test:
 ## run-tests:	Run all tests
 run-tests:
 	XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text --exclude-group='disabled' --log-junit build/test_results/phpunit/junit.xml tests
-
+## load-mysql-schema: Load MySQL schema (waits for MySQL to be ready)
 load-mysql-schema:
-	@docker compose exec php_container apps/SymfonyClient/bin/console doctrine:migrations:migrate --no-interaction
+	@./etc/infrastructure/scripts/wait-for-mysql.sh
+	@echo "🚀 Running migrations..."
+	@docker compose exec php_container /app/apps/SymfonyClient/bin/console doctrine:migrations:migrate --no-interaction
+	@echo "✅ Migrations completed!"
 
 hooks:
 	rm -rf .git/hooks
