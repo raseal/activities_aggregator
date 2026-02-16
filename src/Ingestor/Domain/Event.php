@@ -53,4 +53,49 @@ final class Event extends AggregateRoot
 
         return $event;
     }
+
+    public function id(): EventId
+    {
+        return $this->id;
+    }
+
+    public function baseEventId(): BaseEventId
+    {
+        return $this->baseEventId;
+    }
+
+    public function sellMode(): SellMode
+    {
+        return $this->sellMode;
+    }
+
+    public function title(): EventTitle
+    {
+        return $this->title;
+    }
+
+    public function organizerCompanyId(): ?OrganizerCompanyId
+    {
+        return $this->organizerCompanyId;
+    }
+
+    public function eventPeriod(): EventDatePeriod
+    {
+        return $this->eventPeriod;
+    }
+
+    public function sellPeriod(): SellPeriod
+    {
+        return $this->sellPeriod;
+    }
+
+    public function isSoldOut(): bool
+    {
+        return $this->soldOut;
+    }
+
+    public function zones(): Zones
+    {
+        return $this->zones;
+    }
 }
