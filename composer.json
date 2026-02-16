@@ -41,7 +41,8 @@
     "symfony/redis-messenger": "8.0.*",
     "doctrine/doctrine-bundle": "^3.2",
     "doctrine/orm": "^3.6",
-    "doctrine/doctrine-migrations-bundle": "^4.0"
+    "doctrine/doctrine-migrations-bundle": "^4.0",
+    "ext-redis": "*"
   },
   "scripts": {
     "auto-scripts": {

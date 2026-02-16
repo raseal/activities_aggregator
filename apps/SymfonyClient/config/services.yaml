@@ -50,6 +50,10 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception, method: onException }
 
+    Shared\Infrastructure\Symfony\Messenger\Transport\RedisJsonTransportFactory:
+        tags:
+            - { name: messenger.transport_factory }
+
     _instanceof:
         Shared\Application\Bus\Command\CommandHandler:
             tags:
