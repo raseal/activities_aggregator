@@ -39,6 +39,16 @@ services:
         arguments:
             $baseUrl: '%env(EXTERNAL_PROVIDER_BASE_URL)%'
 
+    Shared\Infrastructure\Symfony\Command\RabbitMQSetupQueuesCommand:
+        arguments:
+            $projectDir: '%kernel.project_dir%/../../'
+            $rabbitHost: '%env(RABBITMQ_HOST)%'
+            $rabbitPort: '%env(RABBITMQ_PORT)%'
+            $rabbitUser: '%env(RABBITMQ_USER)%'
+            $rabbitPassword: '%env(RABBITMQ_PASSWORD)%'
+            $rabbitVhost: '%env(RABBITMQ_VHOST)%'
+        tags: ['console.command']
+
     Shared\Application\Bus\Message\MessageBus:
         '@Shared\Infrastructure\Symfony\Bus\Message\SymfonyMessageBus'
 

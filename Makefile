@@ -11,7 +11,7 @@ status:
 	@docker compose ps
 
 ## build:		Start container and install packages
-build: build-container start hooks composer-install load-mysql-schema
+build: build-container start hooks composer-install load-mysql-schema setup-rabbitmq-queues
 
 ## build-container:Rebuild a container
 build-container:
@@ -54,6 +54,13 @@ load-mysql-schema:
 	@echo "🚀 Running migrations..."
 	@docker compose exec php_container /app/apps/SymfonyClient/bin/console doctrine:migrations:migrate --no-interaction
 	@echo "✅ Migrations completed!"
+
+## setup-rabbitmq-queues: Create RabbitMQ queues for all Domain Events
+setup-rabbitmq-queues:
+	@echo "🐰 Setting up RabbitMQ queues..."
+	@./etc/infrastructure/scripts/wait-for-rabbitmq.sh
+	@docker compose exec php_container /app/apps/SymfonyClient/bin/console rabbitmq:setup-queues || echo "⚠️  RabbitMQ setup failed, continuing..."
+	@echo "✅ RabbitMQ setup completed!"
 
 hooks:
 	rm -rf .git/hooks
