@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ingestor\Domain;
 
+use Ingestor\Domain\Event\EventCreated;
 use Ingestor\Domain\ValueObject\BaseEventId;
 use Ingestor\Domain\ValueObject\EventDatePeriod;
 use Ingestor\Domain\ValueObject\EventId;
@@ -50,6 +51,8 @@ final class Event extends AggregateRoot
             $soldOut,
             $zones,
         );
+
+        $event->record(EventCreated::fromAggregateRoot($event));
 
         return $event;
     }
