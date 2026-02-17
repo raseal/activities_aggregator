@@ -73,7 +73,7 @@ services:
 
     Shared\Infrastructure\Symfony\Messenger\Transport\AutoDiscoveryAmqpTransportFactory:
         arguments:
-            $projectDir: '%kernel.project_dir%/../../'
+            $mapping: !tagged_iterator domain.event.subscriber
         tags:
             - { name: messenger.transport_factory, priority: 10 }
 
@@ -87,3 +87,4 @@ services:
         Shared\Application\Bus\Event\EventSubscriber:
             tags:
                 - { name: messenger.message_handler }
+                - 'domain.event.subscriber'

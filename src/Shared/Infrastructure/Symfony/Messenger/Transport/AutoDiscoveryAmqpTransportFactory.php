@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Shared\Infrastructure\Symfony\Messenger\Transport;
 
-use Shared\Domain\Event\DomainEvent;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Messenger\Bridge\Amqp\Transport\AmqpTransportFactory as BaseAmqpTransportFactory;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
@@ -13,14 +11,19 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
 /**
  * Custom AMQP Transport Factory that auto-discovers queues from DomainEvents.
  *
- * This factory scans all DomainEvent classes in the project and automatically
- * configures their queues in RabbitMQ, eliminating the need to manually declare
- * them in messenger.yaml.
+ * This factory receives all EventSubscribers class names (not instances) from configuration
+ * and automatically configures their queues, eliminating the need to manually
+ * declare them in messenger.yaml.
+ *
+ * Benefits:
+ * - Zero filesystem I/O
+ * - Zero reflection overhead
+ * - Automatically discovers new DomainEvents whenever a subscriber is created
  */
 final class AutoDiscoveryAmqpTransportFactory extends BaseAmqpTransportFactory
 {
     public function __construct(
-        private readonly string $projectDir
+        private readonly iterable $mapping
     ) {}
 
     public function createTransport(
@@ -37,70 +40,57 @@ final class AutoDiscoveryAmqpTransportFactory extends BaseAmqpTransportFactory
     }
 
     /**
-     * Discovers all DomainEvent classes and creates queue configuration for each.
+     * Creates queue configuration from all DomainEvent classes.
+     *
+     * This method iterates over all EventSubscribers (tagged with 'domain.event.subscriber')
+     * and calls their subscribedTo() static method to discover which DomainEvents they handle.
      *
      * @return array<string, array> Queue configuration keyed by queue name
      */
     private function discoverQueuesFromDomainEvents(): array
     {
-        $domainEvents = $this->findDomainEvents();
         $queues = [];
 
-        foreach ($domainEvents as $eventClass) {
-            $queueName = $eventClass::eventName();
+        // The $mapping is a RewindableGenerator from Symfony's DI container
+        // We need to iterate over it to get the actual EventSubscriber instances
+        foreach ($this->mapping as $subscriber) {
+            // Get the class name of the subscriber
+            $subscriberClass = get_class($subscriber);
 
-            // Each queue binds to its own routing key
-            $queues[$queueName] = [
-                'binding_keys' => [$queueName],
-            ];
-        }
+            // Call the static subscribedTo() method to get the DomainEvent class(es)
+            if (method_exists($subscriberClass, 'subscribedTo')) {
+                $eventClasses = $subscriberClass::subscribedTo();
 
-        return $queues;
-    }
+                // Handle both single class-string and array of class-strings
+                if (!is_array($eventClasses)) {
+                    $eventClasses = [$eventClasses];
+                }
 
-    /**
-     * Finds all DomainEvent classes in the project.
-     *
-     * @return array<class-string<DomainEvent>>
-     */
-    private function findDomainEvents(): array
-    {
-        $finder = new Finder();
-        $srcDir = $this->projectDir . '/src';
+                foreach ($eventClasses as $eventClass) {
+                    // Validate it's a string (class name)
+                    if (!is_string($eventClass)) {
+                        continue;
+                    }
 
-        if (!is_dir($srcDir)) {
-            return [];
-        }
+                    // Get the queue name from the event's eventName() method
+                    if (class_exists($eventClass) && method_exists($eventClass, 'eventName')) {
+                        $queueName = $eventClass::eventName();
 
-        $finder->files()
-            ->in($srcDir)
-            ->name('*.php')
-            ->contains('extends DomainEvent');
-
-        $domainEvents = [];
-
-        foreach ($finder as $file) {
-            $content = $file->getContents();
-
-            // Extract namespace
-            if (preg_match('/namespace\s+([^;]+);/', $content, $namespaceMatch)) {
-                $namespace = $namespaceMatch[1];
-
-                // Extract class name
-                if (preg_match('/class\s+(\w+)\s+extends\s+DomainEvent/', $content, $classMatch)) {
-                    $className = $classMatch[1];
-                    $fqcn = $namespace . '\\' . $className;
-
-                    // Verify class exists and is a DomainEvent
-                    if (class_exists($fqcn) && is_subclass_of($fqcn, DomainEvent::class)) {
-                        $domainEvents[] = $fqcn;
+                        // Each queue binds to its own routing key
+                        // Avoid duplicates if multiple subscribers listen to the same event
+                        if (!isset($queues[$queueName])) {
+                            $queues[$queueName] = [
+                                'binding_keys' => [$queueName],
+                            ];
+                        }
                     }
                 }
             }
         }
 
-        return $domainEvents;
+        return $queues;
     }
+
 
     public function supports(string $dsn, array $options): bool
     {
