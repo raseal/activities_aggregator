@@ -4,25 +4,26 @@ declare(strict_types=1);
 
 namespace Shared\Infrastructure\Symfony\Command;
 
-use Shared\Domain\Event\DomainEvent;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Finder\Finder;
 
 #[AsCommand(
     name: 'rabbitmq:setup-queues',
-    description: 'Creates RabbitMQ queues for all Domain Events in the project'
+    description: 'Creates RabbitMQ queues for all Domain Events by discovering them from EventSubscribers'
 )]
 final class RabbitMQSetupQueuesCommand extends Command
 {
     private const EXCHANGE_NAME = 'domain_events';
     private const EXCHANGE_TYPE = 'topic';
 
+    /**
+     * @param iterable $eventSubscribers All EventSubscribers tagged with 'domain.event.subscriber'
+     */
     public function __construct(
-        private readonly string $projectDir,
+        private readonly iterable $eventSubscribers,
         private readonly string $rabbitHost,
         private readonly string $rabbitPort,
         private readonly string $rabbitUser,
@@ -37,13 +38,13 @@ final class RabbitMQSetupQueuesCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $io->title('🐰 RabbitMQ Queue Setup');
-        $io->info('Scanning for Domain Events...');
+        $io->info('Discovering Domain Events from EventSubscribers...');
 
-        // Find all DomainEvent classes
-        $domainEvents = $this->findDomainEvents();
+        // Find all DomainEvent classes from tagged EventSubscribers
+        $domainEvents = $this->discoverDomainEventsFromSubscribers();
 
         if (empty($domainEvents)) {
-            $io->warning('No Domain Events found in the project.');
+            $io->warning('No Domain Events found. Make sure you have EventSubscribers tagged with "domain.event.subscriber".');
             return Command::SUCCESS;
         }
 
@@ -59,10 +60,9 @@ final class RabbitMQSetupQueuesCommand extends Command
 
             // Create queues for each event
             $createdQueues = [];
-            foreach ($domainEvents as $eventClass) {
-                $queueName = $eventClass::eventName();
-                $this->createQueueForEvent($channel, $queueName, $io);
-                $createdQueues[] = $queueName;
+            foreach ($domainEvents as $eventName) {
+                $this->createQueueForEvent($channel, $eventName, $io);
+                $createdQueues[] = $eventName;
             }
 
             $connection->disconnect();
@@ -82,37 +82,52 @@ final class RabbitMQSetupQueuesCommand extends Command
         }
     }
 
-    private function findDomainEvents(): array
+    /**
+     * Discovers DomainEvent classes by iterating over tagged EventSubscribers
+     * and calling their subscribedTo() method.
+     *
+     * This is much more efficient than filesystem scanning and leverages
+     * Symfony's container to get already-loaded classes.
+     *
+     * @return array<string> Array of event names (from eventName())
+     */
+    private function discoverDomainEventsFromSubscribers(): array
     {
-        $finder = new Finder();
-        $finder->files()
-            ->in($this->projectDir . '/src')
-            ->name('*.php')
-            ->contains('extends DomainEvent');
+        $eventNames = [];
 
-        $domainEvents = [];
+        // Iterate over all EventSubscribers (RewindableGenerator from Symfony DI)
+        foreach ($this->eventSubscribers as $subscriber) {
+            $subscriberClass = get_class($subscriber);
 
-        foreach ($finder as $file) {
-            $content = $file->getContents();
+            // Call the static subscribedTo() method to get the DomainEvent class(es)
+            if (method_exists($subscriberClass, 'subscribedTo')) {
+                $eventClasses = $subscriberClass::subscribedTo();
 
-            // Extract namespace
-            if (preg_match('/namespace\s+([^;]+);/', $content, $namespaceMatch)) {
-                $namespace = $namespaceMatch[1];
+                // Handle both single class-string and array of class-strings
+                if (!is_array($eventClasses)) {
+                    $eventClasses = [$eventClasses];
+                }
 
-                // Extract class name
-                if (preg_match('/class\s+(\w+)\s+extends\s+DomainEvent/', $content, $classMatch)) {
-                    $className = $classMatch[1];
-                    $fqcn = $namespace . '\\' . $className;
+                foreach ($eventClasses as $eventClass) {
+                    // Validate it's a string (class name)
+                    if (!is_string($eventClass)) {
+                        continue;
+                    }
 
-                    // Verify class exists and is a DomainEvent
-                    if (class_exists($fqcn) && is_subclass_of($fqcn, DomainEvent::class)) {
-                        $domainEvents[] = $fqcn;
+                    // Get the queue name from the event's eventName() method
+                    if (class_exists($eventClass) && method_exists($eventClass, 'eventName')) {
+                        $eventName = $eventClass::eventName();
+
+                        // Avoid duplicates if multiple subscribers listen to the same event
+                        if (!in_array($eventName, $eventNames, true)) {
+                            $eventNames[] = $eventName;
+                        }
                     }
                 }
             }
         }
 
-        return $domainEvents;
+        return $eventNames;
     }
 
     private function connectToRabbitMQ(): \AMQPConnection

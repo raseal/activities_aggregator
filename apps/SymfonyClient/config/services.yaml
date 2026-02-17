@@ -41,7 +41,7 @@ services:
 
     Shared\Infrastructure\Symfony\Command\RabbitMQSetupQueuesCommand:
         arguments:
-            $projectDir: '%kernel.project_dir%/../../'
+            $eventSubscribers: !tagged_iterator domain.event.subscriber
             $rabbitHost: '%env(RABBITMQ_HOST)%'
             $rabbitPort: '%env(RABBITMQ_PORT)%'
             $rabbitUser: '%env(RABBITMQ_USER)%'
