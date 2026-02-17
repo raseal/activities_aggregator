@@ -8,6 +8,7 @@ services:
       - ./:/app
     depends_on:
       - mysql_container
+      - rabbitmq_container
     working_dir: /app
     ports:
       - '9001:9000'
@@ -67,10 +68,26 @@ services:
     depends_on:
       - redis_container
 
+  rabbitmq_container:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq_container
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - redis-network
+
 volumes:
   mysql_data:
   redis_data:
   redis-insight-data:
+  rabbitmq_data:
 
 networks:
     redis-network:
