@@ -13,6 +13,7 @@ final class EventCreated extends DomainEvent
 {
     public function __construct(
         string $aggregateId,
+        private readonly int $id,
         private readonly int $baseEventId,
         private readonly string $sellMode,
         private readonly string $title,
@@ -32,7 +33,8 @@ final class EventCreated extends DomainEvent
     public static function fromAggregateRoot(EventAR $event): self
     {
         return new self(
-            aggregateId: sprintf('%d-%d', $event->id()->value(), $event->baseEventId()->value()),
+            aggregateId: sprintf('%d%d', $event->id()->value(), $event->baseEventId()->value()),
+            id: $event->id()->value(),
             baseEventId: $event->baseEventId()->value(),
             sellMode: $event->sellMode()->value,
             title: $event->title()->value(),
@@ -77,6 +79,7 @@ final class EventCreated extends DomainEvent
     ): self {
         return new self(
             aggregateId: $aggregateId,
+            id: $body['id'],
             baseEventId: $body['base_event_id'],
             sellMode: $body['sell_mode'],
             title: $body['title'],
@@ -95,6 +98,7 @@ final class EventCreated extends DomainEvent
     public function toPrimitives(): array
     {
         return [
+            'id' => $this->id,
             'base_event_id' => $this->baseEventId,
             'sell_mode' => $this->sellMode,
             'title' => $this->title,
@@ -106,6 +110,11 @@ final class EventCreated extends DomainEvent
             'sold_out' => $this->soldOut,
             'zones' => $this->zones,
         ];
+    }
+
+    public function id(): int
+    {
+        return $this->id;
     }
 
     public function baseEventId(): int
