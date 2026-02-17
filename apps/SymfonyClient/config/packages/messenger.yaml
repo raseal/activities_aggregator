@@ -20,16 +20,6 @@ framework:
                     exchange:
                         name: 'domain_events'
                         type: 'topic'
-                    # Define queues that consumers can subscribe to
-                    # Each queue is bound with its eventName() as routing key
-                    queues:
-                        ingestor.event.created:
-                            binding_keys: ['ingestor.event.created']
-                        # Add more queues here as you create new events:
-                        # ingestor.event.deleted:
-                        #     binding_keys: ['ingestor.event.deleted']
-                        # ingestor.event.postponed:
-                        #     binding_keys: ['ingestor.event.postponed']
                 retry_strategy:
                     max_retries: 3
                     delay: 2000

@@ -71,6 +71,12 @@ services:
         tags:
             - { name: messenger.transport_factory }
 
+    Shared\Infrastructure\Symfony\Messenger\Transport\AutoDiscoveryAmqpTransportFactory:
+        arguments:
+            $projectDir: '%kernel.project_dir%/../../'
+        tags:
+            - { name: messenger.transport_factory, priority: 10 }
+
     _instanceof:
         Shared\Application\Bus\Command\CommandHandler:
             tags:
