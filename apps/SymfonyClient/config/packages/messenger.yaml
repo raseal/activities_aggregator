@@ -6,18 +6,42 @@ framework:
             default_serializer: Shared\Infrastructure\Symfony\Bus\Serializer\SymfonyMessageSerializer
         transports:
             redis-async:
-                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                dsn: '%env(REDIS_TRANSPORT_DSN)%'
                 retry_strategy:
                     max_retries: 3
                     delay: 1000        # millisecond
                     multiplier: 2      # Exponential backoff
                     max_delay: 10000   # 10 secs max
 
+            # RabbitMQ transport for Domain Events
+            rabbitmq-async-events:
+                dsn: '%env(RABBIT_TRANSPORT_DSN)%'
+                serializer: 'Shared\Infrastructure\Symfony\Bus\Serializer\DomainEventSerializer'
+                options:
+                    exchange:
+                        name: 'domain_events'
+                        type: 'topic'
+                    queues:
+                        domain_events:
+                            binding_keys: ['#']  # Subscribe to all events
+                retry_strategy:
+                    max_retries: 3
+                    delay: 2000
+                    multiplier: 2
+                    max_delay: 30000
+
             # TODO: implement this
             failed: 'doctrine://default?queue_name=failed'
         routing:
             # Sends events from the IngestEventCommandHandler to the redis instance, to be processed asynchronously
             'Ingestor\Application\IngestEventMessage': redis-async
+
+            # Routes all DomainEvents to RabbitMQ
+            'Shared\Domain\Event\DomainEvent': rabbitmq-async-events
         buses:
             command.bus:
             query.bus:
+            event.bus:
+                default_middleware: allow_no_handlers
+                middleware:
+                    - validation

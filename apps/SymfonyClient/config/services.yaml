@@ -42,6 +42,13 @@ services:
     Shared\Application\Bus\Message\MessageBus:
         '@Shared\Infrastructure\Symfony\Bus\Message\SymfonyMessageBus'
 
+    Shared\Application\Bus\Event\EventBus:
+        '@Shared\Infrastructure\Symfony\Bus\Event\SymfonyEventBus'
+
+    Shared\Infrastructure\Symfony\Bus\Event\SymfonyEventBus:
+        arguments:
+            $eventBus: '@event.bus'
+
     Shared\Infrastructure\Symfony\Bus\Query\SymfonyQueryBus:
         arguments:
             $bus: '@query.bus'
@@ -61,3 +68,6 @@ services:
         Shared\Application\Bus\Query\QueryHandler:
             tags:
                 - { name: messenger.message_handler, bus: query.bus }
+        Shared\Application\Bus\Event\EventSubscriber:
+            tags:
+                - { name: messenger.message_handler }
