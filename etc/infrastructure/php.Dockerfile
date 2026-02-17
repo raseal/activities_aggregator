@@ -9,6 +9,7 @@ COPY php/xdebug.ini /usr/local/etc/php/conf.d/
 RUN apk --update upgrade \
     && apk add --update linux-headers \
     && apk add --no-cache autoconf automake make gcc g++ bash icu-dev libzip-dev \
+        rabbitmq-c rabbitmq-c-dev \
     && docker-php-ext-install -j$(nproc) \
         bcmath \
         intl \
@@ -18,6 +19,10 @@ RUN apk --update upgrade \
 # Install Redis extension
 RUN pecl install redis \
     && docker-php-ext-enable redis
+
+# Install AMQP extension for RabbitMQ
+RUN pecl install amqp \
+    && docker-php-ext-enable amqp
 
 RUN pecl install xdebug
 
