@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Test\Unit\Ingestor\Application;
 
-use Ingestor\Application\DTO\BaseEvent;
-use Ingestor\Application\DTO\Event as EventDTO;
 use Ingestor\Application\EventsProviderClient;
 use Ingestor\Application\IngestEventMessage;
 use Ingestor\Application\IngestEventsFromExternalProvider;
@@ -13,6 +11,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Shared\Application\Bus\Message\MessageBus;
+use Test\ObjectMother\Ingestor\Application\DTO\EventDTOMother;
 
 final class IngestEventFromExternalProviderTest extends TestCase
 {
@@ -30,11 +29,11 @@ final class IngestEventFromExternalProviderTest extends TestCase
     #[Test]
     public function dispatchesMessageForEachEvent(): void
     {
-        $events = [$this->buildEventDto('1'), $this->buildEventDto('2'), $this->buildEventDto('3')];
+        $events = [EventDTOMother::create(eventId: '1'), EventDTOMother::create(eventId: '2'), EventDTOMother::create(eventId: '3')];
         $this->providerClient->method('fetchEvents')->willReturn($events);
 
         $this->messageBus
-            ->expects($this->exactly(3))
+            ->expects(self::exactly(3))
             ->method('dispatch')
             ->with(self::isInstanceOf(IngestEventMessage::class));
 
@@ -46,7 +45,7 @@ final class IngestEventFromExternalProviderTest extends TestCase
     #[Test]
     public function incrementsFailedCountWhenDispatchThrows(): void
     {
-        $events = [$this->buildEventDto('1'), $this->buildEventDto('2'), $this->buildEventDto('3')];
+        $events = [EventDTOMother::create(eventId: '1'), EventDTOMother::create(eventId: '2'), EventDTOMother::create(eventId: '3')];
         $this->providerClient->method('fetchEvents')->willReturn($events);
         $this->messageBus
             ->method('dispatch')
@@ -73,22 +72,4 @@ final class IngestEventFromExternalProviderTest extends TestCase
         self::assertSame(['total_events' => 0, 'success' => 0, 'failed' => 0], $stats);
     }
 
-    private function buildEventDto(string $eventId): EventDTO
-    {
-        return new EventDTO(
-            baseEvent: new BaseEvent(
-                baseEventId: '100',
-                sellMode: 'online',
-                title: 'Test Event',
-                organizerCompanyId: null,
-            ),
-            eventId: $eventId,
-            eventStartDate: new \DateTimeImmutable('2025-01-01 10:00:00'),
-            eventEndDate: new \DateTimeImmutable('2025-01-01 12:00:00'),
-            sellFrom: new \DateTimeImmutable('2024-06-01 00:00:00'),
-            sellTo: new \DateTimeImmutable('2025-01-01 09:00:00'),
-            soldOut: false,
-            zones: [],
-        );
-    }
 }

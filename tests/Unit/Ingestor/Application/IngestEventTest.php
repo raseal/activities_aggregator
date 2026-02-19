@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Test\Unit\Ingestor\Application;
 
-use Ingestor\Application\DTO\BaseEvent;
-use Ingestor\Application\DTO\Event as EventDTO;
 use Ingestor\Application\EventFactory;
 use Ingestor\Application\IngestEvent;
 use Ingestor\Domain\Event;
@@ -16,6 +14,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Shared\Application\Bus\Event\EventBus;
 use Shared\Domain\Event\DomainEvent;
+use Test\ObjectMother\Ingestor\Application\DTO\EventDTOMother;
 
 final class IngestEventTest extends TestCase
 {
@@ -42,7 +41,7 @@ final class IngestEventTest extends TestCase
     #[Test]
     public function savesEventAndPublishesDomainEvents(): void
     {
-        $eventDto = $this->buildEventDto();
+        $eventDto    = EventDTOMother::create();
         $domainEvent = $this->createMock(DomainEvent::class);
         $event = $this->buildEventAggregateMock([$domainEvent]);
 
@@ -56,7 +55,7 @@ final class IngestEventTest extends TestCase
     #[Test]
     public function logsErrorAndRethrowsWhenRepositoryFails(): void
     {
-        $eventDto = $this->buildEventDto();
+        $eventDto  = EventDTOMother::create();
         $event = $this->buildEventAggregateMock([]);
         $exception = new \RuntimeException('DB connection failed');
 
@@ -80,7 +79,7 @@ final class IngestEventTest extends TestCase
     #[Test]
     public function logsErrorAndRethrowsWhenEventBusFails(): void
     {
-        $eventDto = $this->buildEventDto();
+        $eventDto    = EventDTOMother::create();
         $domainEvent = $this->createMock(DomainEvent::class);
         $event = $this->buildEventAggregateMock([$domainEvent]);
         $exception = new \RuntimeException('Bus unavailable');
@@ -102,24 +101,6 @@ final class IngestEventTest extends TestCase
         ($this->sut)($eventDto);
     }
 
-    private function buildEventDto(): EventDTO
-    {
-        return new EventDTO(
-            baseEvent: new BaseEvent(
-                baseEventId: '100',
-                sellMode: 'online',
-                title: 'Test Event',
-                organizerCompanyId: null,
-            ),
-            eventId: '42',
-            eventStartDate: new \DateTimeImmutable('2025-01-01 10:00:00'),
-            eventEndDate: new \DateTimeImmutable('2025-01-01 12:00:00'),
-            sellFrom: new \DateTimeImmutable('2024-06-01 00:00:00'),
-            sellTo: new \DateTimeImmutable('2025-01-01 09:00:00'),
-            soldOut: false,
-            zones: [],
-        );
-    }
 
     private function buildEventAggregateMock(array $domainEvents): Event&MockObject
     {
