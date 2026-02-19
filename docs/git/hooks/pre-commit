@@ -3,7 +3,7 @@
 
 echo "Running tests... ";
 
-exec('vendor/bin/phpunit', $output, $returnCode);
+exec('vendor/bin/phpunit --no-coverage', $output, $returnCode);
 
 if ($returnCode !== 0) {
   // Show full output
