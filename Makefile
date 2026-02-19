@@ -55,15 +55,15 @@ test-integration:
 
 ## run-tests:	Run all tests
 run-tests:
-	XDEBUG_MODE=coverage ./vendor/bin/phpunit --exclude-group='disabled'
+	XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text --exclude-group='disabled'
 
 ## run-tests-unit: Run only unit tests
 run-tests-unit:
-	XDEBUG_MODE=coverage ./vendor/bin/phpunit --testsuite=Unit --exclude-group='disabled'
+	XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text --testsuite=Unit --exclude-group='disabled'
 
 ## run-tests-integration: Run only integration tests
 run-tests-integration:
-	XDEBUG_MODE=coverage ./vendor/bin/phpunit --testsuite=Integration --exclude-group='disabled'
+	XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text --testsuite=Integration --exclude-group='disabled'
 ## load-mysql-schema: Load MySQL schema (waits for MySQL to be ready)
 load-mysql-schema:
 	@./etc/infrastructure/scripts/wait-for-mysql.sh
