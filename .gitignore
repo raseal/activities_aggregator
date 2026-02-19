@@ -1,5 +1,6 @@
 /vendor
 /.idea
+/.ai
 
 ###> symfony/framework-bundle ###
 /.env.local
@@ -15,4 +16,5 @@
 /build
 /phpunit.xml
 .phpunit.result.cache
+.phpunit.cache
 ###< phpunit/phpunit ###

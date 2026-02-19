@@ -1,5 +1,5 @@
 all: help
-.PHONY: help status build composer-install build-container start stop down destroy shell test hooks run-tests
+.PHONY: help status build composer-install build-container start stop down destroy shell test hooks run-tests run-tests-unit run-tests-integration
 
 current-dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
@@ -45,9 +45,25 @@ composer-install:
 test:
 	@docker compose exec php_container make run-tests
 
+## test-unit:	Run only unit tests inside docker
+test-unit:
+	@docker compose exec php_container make run-tests-unit
+
+## test-integration: Run only integration tests inside docker
+test-integration:
+	@docker compose exec php_container make run-tests-integration
+
 ## run-tests:	Run all tests
 run-tests:
-	XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text --exclude-group='disabled' --log-junit build/test_results/phpunit/junit.xml tests
+	XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text --exclude-group='disabled'
+
+## run-tests-unit: Run only unit tests
+run-tests-unit:
+	XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text --testsuite=Unit --exclude-group='disabled'
+
+## run-tests-integration: Run only integration tests
+run-tests-integration:
+	XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text --testsuite=Integration --exclude-group='disabled'
 ## load-mysql-schema: Load MySQL schema (waits for MySQL to be ready)
 load-mysql-schema:
 	@./etc/infrastructure/scripts/wait-for-mysql.sh
