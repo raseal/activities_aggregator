@@ -61,6 +61,7 @@ For more commands, type `make help`
    - Click on `+ Connect existing database` and set the *Connection URL* as `redis://default@redis_container:6379`
 -  `RabbitMQ Management`: Web application to manage and monitor RabbitMQ instances. You can access it at http://localhost:15672/
    - Login with username `admin` and password `admin`
+- `Opensearch Dashboard`: Web application to visualize the data stored by OpenSearch. You can access it at http://localhost:5601/
 
 # TODO
 - Logging :loading_gif:

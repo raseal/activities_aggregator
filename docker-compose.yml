@@ -13,7 +13,7 @@ services:
     ports:
       - '9001:9000'
     networks:
-      - redis-network
+      - activities_aggregator-network
 
   nginx_container:
     image: nginx:latest
@@ -26,7 +26,7 @@ services:
     depends_on:
       - php_container
     networks:
-      - redis-network
+      - activities_aggregator-network
 
   mysql_container:
     image: mysql:latest
@@ -42,7 +42,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - redis-network
+      - activities_aggregator-network
 
   redis_container:
     image: redis:latest
@@ -53,7 +53,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - redis-network
+      - activities_aggregator-network
 
   redis-insight_container:
     image: redis/redisinsight:latest
@@ -64,7 +64,7 @@ services:
     volumes:
       - redis-insight-data:/data
     networks:
-      - redis-network
+      - activities_aggregator-network
     depends_on:
       - redis_container
 
@@ -81,14 +81,52 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
-      - redis-network
+      - activities_aggregator-network
+
+  opensearch_container:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch_container
+    environment:
+      - discovery.type=${OPENSEARCH_DISCOVERY_TYPE}
+      - bootstrap.memory_lock=${OPENSEARCH_MEMORY_LOCK}
+      - OPENSEARCH_JAVA_OPTS=${OPENSEARCH_JAVA_OPTS}
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD}
+      - DISABLE_SECURITY_PLUGIN=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    networks:
+      - activities_aggregator-network
+
+  opensearch_dashboards_container:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: opensearch_dashboards_container
+    ports:
+      - "5601:5601"
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch_container:9200"]'
+      OPENSEARCH_USERNAME: ${OPENSEARCH_DASHBOARDS_USER}
+      OPENSEARCH_PASSWORD: ${OPENSEARCH_ADMIN_PASSWORD}
+      OPENSEARCH_SSL_VERIFICATION_MODE: "none"
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
+    depends_on:
+      - opensearch_container
+    networks:
+      - activities_aggregator-network
 
 volumes:
   mysql_data:
   redis_data:
   redis-insight-data:
   rabbitmq_data:
+  opensearch_data:
 
 networks:
-    redis-network:
+    activities_aggregator-network:
       driver: bridge
