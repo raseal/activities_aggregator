@@ -1,5 +1,5 @@
 all: help
-.PHONY: help status build composer-install build-container start stop down destroy shell test hooks run-tests run-tests-unit run-tests-integration
+.PHONY: help status build composer-install build-container start stop down destroy shell test hooks run-tests run-tests-unit run-tests-integration outbox-relay
 
 current-dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
@@ -77,6 +77,10 @@ setup-rabbitmq-queues:
 	@./etc/infrastructure/scripts/wait-for-rabbitmq.sh
 	@docker compose exec php_container /app/apps/SymfonyClient/bin/console rabbitmq:setup-queues || echo "⚠️  RabbitMQ setup failed, continuing..."
 	@echo "✅ RabbitMQ setup completed!"
+
+## outbox-relay:	Publish pending Domain Events from outbox table to RabbitMQ
+outbox-relay:
+	@docker compose exec php_container /app/apps/SymfonyClient/bin/console outbox:relay
 
 hooks:
 	rm -rf .git/hooks

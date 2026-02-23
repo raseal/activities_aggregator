@@ -8,12 +8,14 @@ use Doctrine\DBAL\Connection;
 use Ingestor\Domain\Event;
 use Ingestor\Domain\EventRepository;
 use Psr\Log\LoggerInterface;
+use Shared\Infrastructure\Persistence\Outbox\OutboxEventStore;
 
 final readonly class DBALEventRepository implements EventRepository
 {
     public function __construct(
         private Connection $connection,
         private LoggerInterface $logger,
+        private OutboxEventStore $outboxEventStore,
     ) {
     }
 
@@ -24,6 +26,7 @@ final readonly class DBALEventRepository implements EventRepository
         try {
             $this->upsertEvent($event);
             $this->replaceZones($event);
+            $this->outboxEventStore->storeEvents(...$event->pullDomainEvents());
 
             $this->connection->commit();
         } catch (\Throwable $e) {

@@ -8,7 +8,6 @@ use Exception;
 use Ingestor\Application\DTO\Event as EventDTO;
 use Ingestor\Domain\EventRepository;
 use Psr\Log\LoggerInterface;
-use Shared\Application\Bus\Event\EventBus;
 use Throwable;
 
 final readonly class IngestEvent
@@ -17,7 +16,6 @@ final readonly class IngestEvent
         private EventFactory $eventFactory,
         private EventRepository $eventRepository,
         private LoggerInterface $logger,
-        private EventBus $eventBus,
     ) {}
 
     public function __invoke(EventDTO $eventDto): void
@@ -25,7 +23,6 @@ final readonly class IngestEvent
         try {
             $event = $this->eventFactory->fromDTO($eventDto);
             $this->eventRepository->save($event);
-            $this->eventBus->publish(...$event->pullDomainEvents());
         } catch (Throwable $exception) {
             $this->logger->error('Failed to ingest event', [
                 'event_id' => $eventDto->eventId,

@@ -61,6 +61,11 @@ services:
         arguments:
             $eventBus: '@event.bus'
 
+    Shared\Infrastructure\Symfony\Command\OutboxRelayCommand:
+        arguments:
+            $eventBus: '@event.bus'
+        tags: ['console.command']
+
     Shared\Infrastructure\Symfony\Bus\Query\SymfonyQueryBus:
         arguments:
             $bus: '@query.bus'

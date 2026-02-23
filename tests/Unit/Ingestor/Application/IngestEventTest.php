@@ -12,8 +12,6 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Shared\Application\Bus\Event\EventBus;
-use Shared\Domain\Event\DomainEvent;
 use Test\ObjectMother\Ingestor\Application\DTO\EventDTOMother;
 
 final class IngestEventTest extends TestCase
@@ -21,7 +19,6 @@ final class IngestEventTest extends TestCase
     private EventFactory&MockObject $eventFactory;
     private EventRepository&MockObject $eventRepository;
     private LoggerInterface&MockObject $logger;
-    private EventBus&MockObject $eventBus;
     private IngestEvent $sut;
 
     protected function setUp(): void
@@ -29,25 +26,21 @@ final class IngestEventTest extends TestCase
         $this->eventFactory = $this->createMock(EventFactory::class);
         $this->eventRepository = $this->createMock(EventRepository::class);
         $this->logger = $this->createMock(LoggerInterface::class);
-        $this->eventBus = $this->createMock(EventBus::class);
         $this->sut = new IngestEvent(
             $this->eventFactory,
             $this->eventRepository,
             $this->logger,
-            $this->eventBus,
         );
     }
 
     #[Test]
-    public function savesEventAndPublishesDomainEvents(): void
+    public function savesEvent(): void
     {
-        $eventDto    = EventDTOMother::create();
-        $domainEvent = $this->createMock(DomainEvent::class);
-        $event = $this->buildEventAggregateMock([$domainEvent]);
+        $eventDto = EventDTOMother::create();
+        $event = $this->createMock(Event::class);
 
         $this->eventFactory->method('fromDTO')->with($eventDto)->willReturn($event);
         $this->eventRepository->expects($this->once())->method('save')->with($event);
-        $this->eventBus->expects($this->once())->method('publish')->with($domainEvent);
 
         ($this->sut)($eventDto);
     }
@@ -55,8 +48,8 @@ final class IngestEventTest extends TestCase
     #[Test]
     public function logsErrorAndRethrowsWhenRepositoryFails(): void
     {
-        $eventDto  = EventDTOMother::create();
-        $event = $this->buildEventAggregateMock([]);
+        $eventDto = EventDTOMother::create();
+        $event = $this->createMock(Event::class);
         $exception = new \RuntimeException('DB connection failed');
 
         $this->eventFactory->method('fromDTO')->willReturn($event);
@@ -65,49 +58,10 @@ final class IngestEventTest extends TestCase
         $this->logger
             ->expects($this->once())
             ->method('error')
-            ->with(
-                'Failed to ingest event',
-                self::arrayHasKey('error_message'),
-            );
-        $this->eventBus->expects($this->never())->method('publish');
+            ->with('Failed to ingest event', self::arrayHasKey('error_message'));
 
         $this->expectException(\Exception::class);
 
         ($this->sut)($eventDto);
-    }
-
-    #[Test]
-    public function logsErrorAndRethrowsWhenEventBusFails(): void
-    {
-        $eventDto    = EventDTOMother::create();
-        $domainEvent = $this->createMock(DomainEvent::class);
-        $event = $this->buildEventAggregateMock([$domainEvent]);
-        $exception = new \RuntimeException('Bus unavailable');
-
-        $this->eventFactory->method('fromDTO')->willReturn($event);
-        $this->eventRepository->method('save');
-        $this->eventBus->method('publish')->willThrowException($exception);
-
-        $this->logger
-            ->expects($this->once())
-            ->method('error')
-            ->with(
-                'Failed to ingest event',
-                self::arrayHasKey('error_message'),
-            );
-
-        $this->expectException(\Exception::class);
-
-        ($this->sut)($eventDto);
-    }
-
-
-    private function buildEventAggregateMock(array $domainEvents): Event&MockObject
-    {
-        $event = $this->createMock(Event::class);
-        $event->method('pullDomainEvents')->willReturn($domainEvents);
-
-        return $event;
     }
 }
-

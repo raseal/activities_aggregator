@@ -21,6 +21,7 @@ use Ingestor\Domain\ValueObject\Zone\Zones;
 use Ingestor\Infrastructure\Persistence\DBALEventRepository;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Log\NullLogger;
+use Shared\Infrastructure\Persistence\Outbox\OutboxEventStore;
 use Test\DBALTestCase;
 
 final class DBALEventRepositoryTest extends DBALTestCase
@@ -30,7 +31,11 @@ final class DBALEventRepositoryTest extends DBALTestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->repository = new DBALEventRepository($this->connection(), new NullLogger());
+        $this->repository = new DBALEventRepository(
+            $this->connection(),
+            new NullLogger(),
+            new OutboxEventStore($this->connection()),
+        );
     }
 
     #[Test]
