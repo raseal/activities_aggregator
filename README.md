@@ -63,6 +63,5 @@ For more commands, type `make help`
    - Login with username `admin` and password `admin`
 
 # TODO
-- Update docs with `outbox pattern`
-- Logging :loadog_gif:
+- Logging :loading_gif:
 - Second context :loading_gif:
