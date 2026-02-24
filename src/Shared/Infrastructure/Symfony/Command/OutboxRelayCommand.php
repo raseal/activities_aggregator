@@ -21,7 +21,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
     description: 'Reads pending Domain Events from the outbox table and publishes them to RabbitMQ',
 )]
 final class OutboxRelayCommand extends Command
-{// TODO: refactor this god-CLI :D
+{
     private const int DEFAULT_BATCH_SIZE = 100;
 
     public function __construct(
