@@ -11,7 +11,7 @@ status:
 	@docker compose ps
 
 ## build:		Start container and install packages
-build: build-container start hooks composer-install load-mysql-schema setup-rabbitmq-queues
+build: build-container start hooks composer-install load-mysql-schema setup-rabbitmq-queues setup-opensearch
 
 ## build-container:Rebuild a container
 build-container:
@@ -77,6 +77,13 @@ setup-rabbitmq-queues:
 	@./etc/infrastructure/scripts/wait-for-rabbitmq.sh
 	@docker compose exec php_container /app/apps/SymfonyClient/bin/console rabbitmq:setup-queues || echo "⚠️  RabbitMQ setup failed, continuing..."
 	@echo "✅ RabbitMQ setup completed!"
+
+## setup-opensearch: Create opensearch indexes
+setup-opensearch:
+	@echo "🗂️ Setting up OpenSearch indexes..."
+	@./etc/infrastructure/scripts/wait-for-opensearch.sh
+	@docker compose exec php_container /app/apps/SymfonyClient/bin/console opensearch:init || echo "⚠️  OpenSearch setup failed, continuing..."
+	@echo "✅ OpenSearch setup completed!"
 
 ## outbox-relay:	Publish pending Domain Events from outbox table to RabbitMQ
 outbox-relay:
