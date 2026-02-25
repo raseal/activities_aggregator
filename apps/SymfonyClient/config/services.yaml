@@ -37,10 +37,20 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    # ##############################
+    # Project specific dependencies
+    # ##############################
     Ingestor\Infrastructure\Http\HttpEventsProviderClient:
         arguments:
             $baseUrl: '%env(EXTERNAL_PROVIDER_BASE_URL)%'
 
+    Catalog\Update\Infrastructure\Persistence\OpenSearchCatalogWriter:
+        arguments:
+            $client: '@opensearch.client'
+
+    # ########################################
+    # Shared dependencies for all the project
+    # ########################################
     Shared\Infrastructure\Symfony\Command\RabbitMQSetupQueuesCommand:
         arguments:
             $eventSubscribers: !tagged_iterator domain.event.subscriber
