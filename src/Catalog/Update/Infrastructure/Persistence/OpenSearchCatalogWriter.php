@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Catalog\Update\Infrastructure\Persistence;
 
-use Catalog\Search\CatalogItemView;
+use Catalog\Search\Application\CatalogItemView;
 use Catalog\Update\Application\CatalogWriter;
 use OpenSearch\Client;
 

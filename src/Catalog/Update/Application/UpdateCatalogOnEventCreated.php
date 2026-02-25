@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Catalog\Update\Application;
 
-use Catalog\Search\CatalogItemView;
-use Catalog\Search\CatalogZoneView;
+use Catalog\Search\Application\CatalogItemView;
+use Catalog\Search\Application\CatalogZoneView;
 use Ingestor\Domain\Event\EventCreated;
 use Shared\Application\Bus\Event\EventSubscriber;
 

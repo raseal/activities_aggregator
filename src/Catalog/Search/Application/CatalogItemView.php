@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Catalog\Search;
+namespace Catalog\Search\Application;
 
 final readonly class CatalogItemView
 {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Catalog\Update\Application;
 
-use Catalog\Search\CatalogItemView;
+use Catalog\Search\Application\CatalogItemView;
 
 interface CatalogWriter
 {
