@@ -53,11 +53,20 @@ services:
 
     Shared\Infrastructure\Symfony\Command\OpenSearchSetupCommand:
         arguments:
+            $client: '@opensearch.client'
+        tags: ['console.command']
+
+    opensearch.client:
+        class: OpenSearch\Client
+        factory: '@shared.infrastructure.persistence.opensearch.opensearch_client_factory'
+
+    shared.infrastructure.persistence.opensearch.opensearch_client_factory:
+        class: Shared\Infrastructure\Persistence\OpenSearch\OpenSearchClientFactory
+        arguments:
             $host: '%env(OPENSEARCH_HOST)%'
             $port: '%env(OPENSEARCH_PORT)%'
             $user: '%env(OPENSEARCH_ADMIN_USER)%'
             $password: '%env(OPENSEARCH_ADMIN_PASSWORD)%'
-        tags: ['console.command']
 
     Shared\Application\Bus\Message\MessageBus:
         '@Shared\Infrastructure\Symfony\Bus\Message\SymfonyMessageBus'

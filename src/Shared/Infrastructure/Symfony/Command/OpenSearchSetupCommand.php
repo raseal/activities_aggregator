@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Shared\Infrastructure\Symfony\Command;
 
 use OpenSearch\Client;
-use OpenSearch\SymfonyClientFactory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,17 +18,12 @@ use function sprintf;
 )]
 final class OpenSearchSetupCommand extends Command
 {
-    private Client $client;
     private const string INDEX = 'catalog-search';
 
     public function __construct(
-        private readonly string $host,
-        private readonly int $port,
-        private readonly string $user,
-        private readonly string $password,
+        private Client $client,
     ) {
         parent::__construct();
-        $this->connectClient();
     }
 
     protected function execute(
@@ -54,15 +48,6 @@ final class OpenSearchSetupCommand extends Command
         $io->success(sprintf('✅ Successfully created index %s', self::INDEX));
 
         return Command::SUCCESS;
-    }
-
-    private function connectClient(): void
-    {
-        $this->client = new SymfonyClientFactory()->create([
-            'base_uri' => 'http://' . $this->host. ':' . $this->port,
-            'auth_basic' => [$this->user, $this->password],
-            'verify_peer' => false,
-        ]);
     }
 
     private function mapping(): array
