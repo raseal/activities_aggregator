@@ -21,11 +21,9 @@ final class UpdateCatalog
     {
         try {
             $this->catalogWriter->update($itemView);
-            $this->logger->info('Catalog item was updated: '.json_encode($itemView->toArray()));
+            $this->logger->info('Catalog item was updated: '. json_encode($itemView->toArray(), JSON_THROW_ON_ERROR));
         } catch (Throwable $exception) {
             $this->logger->error($exception->getMessage());
-            dump($exception->getMessage());
-            dd('uala!!');
         }
     }
 }
