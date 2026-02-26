@@ -14,13 +14,15 @@ use Shared\Domain\Criteria\OrderType;
 
 final class OpenSearchCriteriaConverter
 {
+    private const int DEFAULT_SIZE = 100;
+
     public function convert(Criteria $criteria): array
     {
         return [
             'query' => $this->buildQuery($criteria->filters()),
             'sort' => $this->buildSort($criteria->order()),
             'from' => $criteria->offset() ?? 0,
-            'size' => $criteria->limit() ?? 0,
+            'size' => $criteria->limit() ?? self::DEFAULT_SIZE,
         ];
     }
 
